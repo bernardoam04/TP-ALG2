@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+env/
+venv/
+ENV/
+*.egg-info/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# Arquivos temporários
+*.log
+*.tmp
+*.bak
+*~
+
+# Arquivos de sistema
+Thumbs.db
+Desktop.ini
