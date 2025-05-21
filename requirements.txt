@@ -1,0 +1,7 @@
+# Requisitos principais
+plotly==5.21.0
+pandas==2.2.2
+numpy==1.26.4
+
+kaleido==0.2.1  # necessário para exportar gráficos do plotly como imagens
+python-dotenv==1.0.1
