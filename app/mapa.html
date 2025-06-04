@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 
     <style>
-        #map_593f354c1e1480ea100d1b6a9f808036 { height: 100vh; }
+        #map { height: 100vh; }
     </style>
 
     <script>
@@ -23,10 +23,10 @@
     </script>
 </head>
 <body>
-    <div class="folium-map" id="map_593f354c1e1480ea100d1b6a9f808036"></div>
+    <div class="folium-map" id="map"></div>
 
     <script>
-        var map_593f354c1e1480ea100d1b6a9f808036 = L.map("map_593f354c1e1480ea100d1b6a9f808036", {
+        const map = L.map("map", {
             center: [-19.92, -43.94],
             crs: L.CRS.EPSG3857,
             zoom: 13,
@@ -34,7 +34,7 @@
             preferCanvas: false
         });
 
-        var tile_layer_da3c725082fff0c07eaa7df42e5f21d5 = L.tileLayer(
+        const baseTileLayer = L.tileLayer(
             "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
                 minZoom: 0,
                 maxZoom: 20,
@@ -47,52 +47,44 @@
                 opacity: 1,
             }
         );
+        baseTileLayer.addTo(map);
 
-        tile_layer_da3c725082fff0c07eaa7df42e5f21d5.addTo(map_593f354c1e1480ea100d1b6a9f808036);
-
-        function geo_json_3c432acb6f65d1d42d52ba7aca9fbccf_styler(feature) {
-            return { "color": "green", "fillOpacity": 0.1, "weight": 1 };
+        function distritosStyle(feature) {
+            return { color: "green", fillOpacity: 0.1, weight: 1 };
         }
 
-        function geo_json_3c432acb6f65d1d42d52ba7aca9fbccf_onEachFeature(feature, layer) {}
+        function onEachDistrito(feature, layer) {
+            // Nada ainda
+        }
 
-        var geo_json_3c432acb6f65d1d42d52ba7aca9fbccf = L.geoJson(null, {
-            onEachFeature: geo_json_3c432acb6f65d1d42d52ba7aca9fbccf_onEachFeature,
-            style: geo_json_3c432acb6f65d1d42d52ba7aca9fbccf_styler
+        const distritosLayer = L.geoJson(null, {
+            style: distritosStyle,
+            onEachFeature: onEachDistrito
         });
 
-        function geo_json_3c432acb6f65d1d42d52ba7aca9fbccf_add(data) {
-            geo_json_3c432acb6f65d1d42d52ba7aca9fbccf.addData(data);
+        function adicionarDistritos(data) {
+            distritosLayer.addData(data);
         }
 
-        geo_json_3c432acb6f65d1d42d52ba7aca9fbccf.addTo(map_593f354c1e1480ea100d1b6a9f808036);
+        distritosLayer.addTo(map);
 
         fetch("regiao_bh.geojson")
             .then(response => response.json())
-            .then(data => geo_json_3c432acb6f65d1d42d52ba7aca9fbccf_add(data));
+            .then(data => adicionarDistritos(data));
 
-        var layer_control_98bc01d90d07e1e1dec18330c8287b33_layers = {
-            base_layers: {
-                "cartodbpositron": tile_layer_da3c725082fff0c07eaa7df42e5f21d5,
-            },
-            overlays: {
-                "Distritos": geo_json_3c432acb6f65d1d42d52ba7aca9fbccf
-            },
-        };
-
-        let layer_control_98bc01d90d07e1e1dec18330c8287b33 = L.control.layers(
-            layer_control_98bc01d90d07e1e1dec18330c8287b33_layers.base_layers,
-            layer_control_98bc01d90d07e1e1dec18330c8287b33_layers.overlays,
+        const layersControl = L.control.layers(
+            { "CartoDB Positron": baseTileLayer },
+            { "Distritos": distritosLayer },
             {
                 position: "topright",
                 collapsed: true,
                 autoZIndex: true,
             }
-        ).addTo(map_593f354c1e1480ea100d1b6a9f808036);
+        ).addTo(map);
 
         function plotarEstabelecimentos(bounds) {
-            var sw = bounds.getSouthWest();
-            var ne = bounds.getNorthEast();
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
 
             fetch("http://127.0.0.1:5000/filtrar", {
                 method: "POST",
@@ -102,128 +94,112 @@
                     ne: { lat: ne.lat, lng: ne.lng }
                 })
             })
-                .then(response => response.json())
-                .then(estabelecimentos => {
-                    if (window.restaurantesGroup) {
-                        map_593f354c1e1480ea100d1b6a9f808036.removeLayer(window.restaurantesGroup);
-                    }
-                    if (window.baresGroup) {
-                        map_593f354c1e1480ea100d1b6a9f808036.removeLayer(window.baresGroup);
-                    }
+            .then(response => response.json())
+            .then(estabelecimentos => {
+                if (window.restaurantesGroup) map.removeLayer(window.restaurantesGroup);
+                if (window.baresGroup) map.removeLayer(window.baresGroup);
 
-                    const restauranteIcon = L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowSize: [41, 41]
-                    });
-
-                    const barIcon = L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowSize: [41, 41]
-                    });
-
-                    window.restaurantesGroup = L.layerGroup();
-                    window.baresGroup = L.layerGroup();
-
-                    estabelecimentos.forEach(estab => {
-                        const lat = parseFloat(estab.LATITUDE);
-                        const lon = parseFloat(estab.LONGITUDE);
-                        const nome = estab.NOME_FANTASIA || estab.NOME || "Sem nome";
-                        const endereco = `${estab.DESC_LOGRADOURO || ''} ${estab.NOME_LOGRADOURO || ''}, ${estab.NUMERO_IMOVEL || ''}, ${estab.NOME_BAIRRO || ''}`;
-                        const inicio = estab.DATA_INICIO_ATIVIDADE || "Desconhecida";
-                        const alvara = estab.IND_POSSUI_ALVARA || "Não especificado";
-
-                        const popup = `<strong>${nome}</strong><br>${endereco}<br>Início: ${inicio}<br>Alvará: ${alvara}`;
-                        const isBar = estab.DESCRICAO_CNAE_PRINCIPAL && estab.DESCRICAO_CNAE_PRINCIPAL.includes("BARES");
-
-                        const marker = L.marker([lat, lon], {
-                            icon: isBar ? barIcon : restauranteIcon
-                        }).bindPopup(popup);
-
-                        if (isBar) {
-                            window.baresGroup.addLayer(marker);
-                        } else {
-                            window.restaurantesGroup.addLayer(marker);
-                        }
-                    });
-
-                    window.restaurantesGroup.addTo(map_593f354c1e1480ea100d1b6a9f808036);
-                    window.baresGroup.addTo(map_593f354c1e1480ea100d1b6a9f808036);
-
-                    if (window.layerControl) {
-                        map_593f354c1e1480ea100d1b6a9f808036.removeControl(window.layerControl);
-                    }
-
-                    window.layerControl = L.control.layers(null, {
-                        "Restaurantes": window.restaurantesGroup,
-                        "Bares": window.baresGroup
-                    }).addTo(map_593f354c1e1480ea100d1b6a9f808036);
-                })
-                .catch(error => {
-                    console.error("Erro ao buscar estabelecimentos:", error);
+                const restauranteIcon = L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
                 });
-        }
 
-        var mapaParaDesenhar = window.map_593f354c1e1480ea100d1b6a9f808036;
+                const barIcon = L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                });
 
-        if (mapaParaDesenhar) {
-            var drawnItems = new L.FeatureGroup();
-            mapaParaDesenhar.addLayer(drawnItems);
+                window.restaurantesGroup = L.layerGroup();
+                window.baresGroup = L.layerGroup();
 
-            var drawControl = new L.Control.Draw({
-                edit: { featureGroup: drawnItems, remove: true },
-                draw: {
-                    polygon: false,
-                    polyline: false,
-                    circle: false,
-                    circlemarker: false,
-                    marker: false,
-                    rectangle: {
-                        shapeOptions: {
-                            color: '#007bff',
-                            weight: 3,
-                            fillOpacity: 0.1
-                        }
-                    }
-                }
-            });
+                estabelecimentos.forEach(estab => {
+                    const lat = parseFloat(estab.LATITUDE);
+                    const lon = parseFloat(estab.LONGITUDE);
+                    const nome = estab.NOME_FANTASIA || estab.NOME || "Sem nome";
+                    const endereco = `${estab.DESC_LOGRADOURO || ''} ${estab.NOME_LOGRADOURO || ''}, ${estab.NUMERO_IMOVEL || ''}, ${estab.NOME_BAIRRO || ''}`;
+                    const inicio = estab.DATA_INICIO_ATIVIDADE || "Desconhecida";
+                    const alvara = estab.IND_POSSUI_ALVARA || "Não especificado";
 
-            mapaParaDesenhar.addControl(drawControl);
+                    const popup = `<strong>${nome}</strong><br>${endereco}<br>Início: ${inicio}<br>Alvará: ${alvara}`;
+                    const isBar = estab.DESCRICAO_CNAE_PRINCIPAL && estab.DESCRICAO_CNAE_PRINCIPAL.includes("BARES");
 
-            mapaParaDesenhar.on(L.Draw.Event.CREATED, function (e) {
-                var layer = e.layer;
-                drawnItems.clearLayers();
-                drawnItems.addLayer(layer);
-                plotarEstabelecimentos(layer.getBounds());
-            });
+                    const marker = L.marker([lat, lon], {
+                        icon: isBar ? barIcon : restauranteIcon
+                    }).bindPopup(popup);
 
-            mapaParaDesenhar.on(L.Draw.Event.EDITED, function (event) {
-                event.layers.eachLayer(function (layer) {
-                    if (layer instanceof L.Rectangle) {
-                        plotarEstabelecimentos(layer.getBounds());
+                    if (isBar) {
+                        window.baresGroup.addLayer(marker);
+                    } else {
+                        window.restaurantesGroup.addLayer(marker);
                     }
                 });
-            });
 
-            mapaParaDesenhar.on(L.Draw.Event.DELETED, function () {
-                if (window.restaurantesGroup) {
-                    map_593f354c1e1480ea100d1b6a9f808036.removeLayer(window.restaurantesGroup);
-                }
-                if (window.baresGroup) {
-                    map_593f354c1e1480ea100d1b6a9f808036.removeLayer(window.baresGroup);
-                }
-                if (window.layerControl) {
-                    map_593f354c1e1480ea100d1b6a9f808036.removeControl(window.layerControl);
-                }
+                window.restaurantesGroup.addTo(map);
+                window.baresGroup.addTo(map);
+
+                if (window.layerControl) map.removeControl(window.layerControl);
+
+                window.layerControl = L.control.layers(null, {
+                    "Restaurantes": window.restaurantesGroup,
+                    "Bares": window.baresGroup
+                }).addTo(map);
+            })
+            .catch(error => {
+                console.error("Erro ao buscar estabelecimentos:", error);
             });
         }
+
+        const drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        const drawControl = new L.Control.Draw({
+            edit: { featureGroup: drawnItems, remove: true },
+            draw: {
+                polygon: false,
+                polyline: false,
+                circle: false,
+                circlemarker: false,
+                marker: false,
+                rectangle: {
+                    shapeOptions: {
+                        color: '#007bff',
+                        weight: 3,
+                        fillOpacity: 0.1
+                    }
+                }
+            }
+        });
+
+        map.addControl(drawControl);
+
+        map.on(L.Draw.Event.CREATED, function (e) {
+            const layer = e.layer;
+            drawnItems.clearLayers();
+            drawnItems.addLayer(layer);
+            plotarEstabelecimentos(layer.getBounds());
+        });
+
+        map.on(L.Draw.Event.EDITED, function (event) {
+            event.layers.eachLayer(layer => {
+                if (layer instanceof L.Rectangle) {
+                    plotarEstabelecimentos(layer.getBounds());
+                }
+            });
+        });
+
+        map.on(L.Draw.Event.DELETED, function () {
+            if (window.restaurantesGroup) map.removeLayer(window.restaurantesGroup);
+            if (window.baresGroup) map.removeLayer(window.baresGroup);
+            if (window.layerControl) map.removeControl(window.layerControl);
+        });
     </script>
 </body>
 </html>
