@@ -66,7 +66,7 @@ def carregar_dados_csv(filepath):
     return estabelecimentos
 
 # Carrega e constrói a KD-Tree
-dados = carregar_dados_csv("docs/20250401_atividade_economica_coord.csv")
+dados = carregar_dados_csv("./bares_com_cdb.csv")
 arvore = build_kdtree(dados)
 
 @app.route("/filtrar", methods=["POST"])
@@ -78,7 +78,12 @@ def filtrar():
     lat_min, lon_min = sw["lat"], sw["lng"]
     lat_max, lon_max = ne["lat"], ne["lng"]
 
+    comida_filter = payload.get("comida_di_buteco", False)
+
     resultados = range_query_kdtree(arvore, ((lat_min, lon_min), (lat_max, lon_max)))
+
+    if comida_filter:
+        resultados = [r for r in resultados if r.get("cdb") == "1"]
 
     return jsonify(resultados)
 

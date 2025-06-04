@@ -58,12 +58,15 @@ function plotarEstabelecimentos(bounds) {
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
 
-    fetch("https://tp-alg2.onrender.com/filtrar", {
+    const apenasComidaDiButeco = document.getElementById("comidaCheckbox").checked;
+
+    fetch("http://127.0.0.1:5000/filtrar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             sw: { lat: sw.lat, lng: sw.lng },
-            ne: { lat: ne.lat, lng: ne.lng }
+            ne: { lat: ne.lat, lng: ne.lng },
+            comida_di_buteco: apenasComidaDiButeco
         })
     })
     .then(response => response.json())

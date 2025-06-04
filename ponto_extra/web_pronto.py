@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import time
 import traceback 
 
-df = pd.read_csv('butecos_bh.csv')
+df = pd.read_csv('../data/bares_cdb.csv')
 print("[INFO] DataFrame original 'df' após leitura do CSV (primeiras linhas):")
 print(df.head())
 print("[INFO] dtypes do DataFrame original 'df':")

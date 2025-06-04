@@ -26,7 +26,10 @@ for page in range(1, 12):  # páginas de 1 a 11
         link_tag = item.find("a", string="Detalhes")
         link = link_tag['href'] if link_tag else "Sem link"
 
-        dados.append({'Nome': nome, 'Link Detalhes': link})
+        img_tag = item.find("div", class_="image").find("img") if item.find("div", class_="image") else None
+        img_link = img_tag['src'] if img_tag else "Sem imagem"
+
+        dados.append({'Nome': nome, 'Link Detalhes': link, 'Link Imagem': img_link})
 
 # Criar DataFrame
 df = pd.DataFrame(dados)
