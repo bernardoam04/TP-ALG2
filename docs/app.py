@@ -66,7 +66,7 @@ def carregar_dados_csv(filepath):
     return estabelecimentos
 
 # Carrega e constrói a KD-Tree
-dados = carregar_dados_csv("20250401_atividade_economica_coord.csv")
+dados = carregar_dados_csv("./20250401_atividade_economica_coord.csv")
 arvore = build_kdtree(dados)
 
 @app.route("/filtrar", methods=["POST"])
