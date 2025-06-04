@@ -58,7 +58,7 @@ function plotarEstabelecimentos(bounds) {
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
 
-    fetch("http://127.0.0.1:5000/filtrar", {
+    fetch("https://tp-alg2.onrender.com/filtrar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
