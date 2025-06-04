@@ -9,7 +9,7 @@ const map = L.map("map", {
 const baseTileLayer = L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
         minZoom: 0,
-        maxZoom: 20,
+        maxZoom: 18,
         maxNativeZoom: 20,
         noWrap: false,
         attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
@@ -89,8 +89,15 @@ function plotarEstabelecimentos(bounds) {
             shadowSize: [41, 41]
         });
 
-        window.restaurantesGroup = L.layerGroup();
-        window.baresGroup = L.layerGroup();
+        // Usa marker cluster groups
+        window.restaurantesGroup = L.markerClusterGroup({
+            chunkedLoading: true,
+            maxClusterRadius: 40
+        });
+        window.baresGroup = L.markerClusterGroup({
+            chunkedLoading: true,
+            maxClusterRadius: 40
+        });
 
         estabelecimentos.forEach(estab => {
             const lat = parseFloat(estab.LATITUDE);
