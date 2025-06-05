@@ -110,7 +110,16 @@ function plotarEstabelecimentos(bounds) {
             const inicio = estab.DATA_INICIO_ATIVIDADE || "Desconhecida";
             const alvara = estab.IND_POSSUI_ALVARA || "Não especificado";
 
-            const popup = `<strong>${nome}</strong><br>${endereco}<br>Início: ${inicio}<br>Alvará: ${alvara}`;
+            let popup = `<div class="text-center">`;
+            popup += `<strong>${nome}</strong><br>${endereco}<br>Início: ${inicio}<br>Alvará: ${alvara}<br><br>`;
+            if (estab["Nome Petisco"] && estab["Descricao"] && estab["Link Imagem"]) {
+                popup += `
+                    <img src="${estab["Link Imagem"]}" class="img-fluid rounded mb-2" alt="Petisco"><br>
+                    <strong>${estab["Nome Petisco"]}</strong><br>
+                    <button class="btn btn-sm btn-outline-info mt-2" onclick="mostrarDescricao('${estab["Descricao"].replace(/'/g, "\\'")}')">ℹ️ Ver Descrição</button>
+                `;
+            }
+            popup += `</div>`;
             const isBar = estab.DESCRICAO_CNAE_PRINCIPAL && estab.DESCRICAO_CNAE_PRINCIPAL.includes("BARES");
 
             const marker = L.marker([lat, lon], {
@@ -182,3 +191,11 @@ map.on(L.Draw.Event.DELETED, function () {
     if (window.baresGroup) map.removeLayer(window.baresGroup);
     if (window.layerControl) map.removeControl(window.layerControl);
 });
+
+//Inserir o conteúdo no modal
+function mostrarDescricao(texto) {
+    const modalBody = document.getElementById("descricaoModalBody");
+    modalBody.textContent = texto;
+    const modal = new bootstrap.Modal(document.getElementById("descricaoModal"));
+    modal.show();
+}

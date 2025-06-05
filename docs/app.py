@@ -65,6 +65,17 @@ def carregar_dados_csv(filepath):
                 continue
     return estabelecimentos
 
+def carregar_cdb_csv(filepath):
+    cdb_dict = {}
+    with open(filepath, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=',')
+        for row in reader:
+            cdb_dict[row["ID_ATIV_ECON_ESTABELECIMENTO"]] = row
+    return cdb_dict
+
+# Carrega os dados do comida di buteco para um dicionário
+cdb_dados = carregar_cdb_csv("./comida_di_buteco.csv")
+
 # Carrega e constrói a KD-Tree
 dados = carregar_dados_csv("./bares_com_cdb.csv")
 arvore = build_kdtree(dados)
@@ -83,8 +94,9 @@ def filtrar():
     resultados = range_query_kdtree(arvore, ((lat_min, lon_min), (lat_max, lon_max)))
 
     if comida_filter:
-        resultados = [r for r in resultados if r.get("cdb") == "1"]
-
+        resultados = [
+            {**r, **cdb_dados[r["ID_ATIV_ECON_ESTABELECIMENTO"]]} for r in resultados if r["ID_ATIV_ECON_ESTABELECIMENTO"] in cdb_dados
+        ]
     return jsonify(resultados)
 
 if __name__ == "__main__":
