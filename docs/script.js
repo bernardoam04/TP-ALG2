@@ -121,44 +121,51 @@ function plotarEstabelecimentos(bounds) {
         });
 
         estabelecimentos.forEach(estab => {
-            console.log("Estab:", estab);
-            const isButeco = estab.comida_di_buteco;
-            console.log(isButeco? "1" : "0")
             const lat = parseFloat(estab.LATITUDE);
             const lon = parseFloat(estab.LONGITUDE);
             const nome = estab.NOME_FANTASIA || estab.NOME || "Sem nome";
             const endereco = `${estab.DESC_LOGRADOURO || ''} ${estab.NOME_LOGRADOURO || ''}, ${estab.NUMERO_IMOVEL || ''}, ${estab.NOME_BAIRRO || ''}`;
             const inicio = estab.DATA_INICIO_ATIVIDADE || "Desconhecida";
             const alvara = estab.IND_POSSUI_ALVARA || "Não especificado";
+            const isButeco = estab.comida_di_buteco;
+            const isBar = estab.DESCRICAO_CNAE_PRINCIPAL && estab.DESCRICAO_CNAE_PRINCIPAL.includes("BARES");
 
-            let popup = `<div class="text-center">`;
-            popup += `<strong>${nome}</strong><br>${endereco}<br>Início: ${inicio}<br>Alvará: ${alvara}<br><br>`;
+            const icon = isButeco
+                ? (isBar ? goldenBarIcon : goldenRestIcon)
+                : (isBar ? barIcon : restauranteIcon)
+
+            let popup = `
+                <div class="text-center">
+                <strong>${nome}</strong><br>
+                ${endereco}<br>
+                Início: ${inicio}<br>
+                Alvará: ${alvara}<br><br>
+            `;
+                        
             if (isButeco){
+                const descricao = (estab["Descricao"] || "").replace(/"/g, '&quot;');
                 popup += `
                     <img src="imagens/${estab["ID_ATIV_ECON_ESTABELECIMENTO"]}.jpg" class="img-fluid rounded mb-2" alt="Petisco"><br>
-                    <strong>${estab["Nome Petisco"]}</strong><br>
-                    <button class="btn btn-sm btn-outline-info mt-2" onclick="mostrarDescricao('${estab["Descricao"].replace(/'/g, "\\'")}')">ℹ️ Ver Descrição</button>
+                    <strong>${estab["Nome Petisco"]} 
+                    <i  class="bi bi-info-circle ms-2 text-primary"
+                        data-bs-toggle="tooltip" 
+                        data-bs-placement="top" 
+                        title="${descricao}">
+                    </i>
+                    </strong><br></br>
                 `;
             }
             popup += `</div>`;
-            const isBar = estab.DESCRICAO_CNAE_PRINCIPAL && estab.DESCRICAO_CNAE_PRINCIPAL.includes("BARES");
             
-            let marker;
-            if(isButeco){
-                marker = L.marker([lat, lon], {
-                    icon: isBar ? goldenBarIcon : goldenRestIcon
-                }).bindPopup(popup);
-            }else{
-                marker = L.marker([lat, lon], {
-                    icon: isBar ? barIcon : restauranteIcon
-                }).bindPopup(popup);
-            }
+            const marker = L.marker([lat, lon], { icon }).bindPopup(popup);
 
-            if (isBar) {
-                window.baresGroup.addLayer(marker);
-            } else {
-                window.restaurantesGroup.addLayer(marker);
+            if (isButeco) {
+                marker.on("popupopen", () => {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+                });
             }
+            
+            (isBar ? window.baresGroup : window.restaurantesGroup).addLayer(marker);
         });
 
         window.restaurantesGroup.addTo(map);
@@ -219,14 +226,6 @@ map.on(L.Draw.Event.DELETED, function () {
     if (window.baresGroup) map.removeLayer(window.baresGroup);
     if (window.layerControl) map.removeControl(window.layerControl);
 });
-
-//Inserir o conteúdo no modal
-function mostrarDescricao(texto) {
-    const modalBody = document.getElementById("descricaoModalBody");
-    modalBody.textContent = texto;
-    const modal = new bootstrap.Modal(document.getElementById("descricaoModal"));
-    modal.show();
-}
 
 // Chamar novamente a função para quando marcar ou desmarcar o checkbox
 function atualizarFiltroComida(){
