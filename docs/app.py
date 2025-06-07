@@ -74,10 +74,10 @@ def carregar_cdb_csv(filepath):
     return cdb_dict
 
 # Carrega os dados do comida di buteco para um dicionário
-cdb_dados = carregar_cdb_csv("./comida_di_buteco.csv")
+cdb_dados = carregar_cdb_csv("docs/comida_di_buteco.csv")
 
 # Carrega e constrói a KD-Tree {Feito apenas ao iniciar o servidor}
-dados = carregar_dados_csv("./bares_com_cdb.csv")
+dados = carregar_dados_csv("docs/bares_com_cdb.csv")
 arvore = build_kdtree(dados)
 
 @app.route("/filtrar", methods=["POST"])
