@@ -76,14 +76,14 @@ def carregar_cdb_csv(filepath):
 # Carrega os dados do comida di buteco para um dicionário
 cdb_dados = carregar_cdb_csv("./comida_di_buteco.csv")
 
-# Carrega e constrói a KD-Tree
+# Carrega e constrói a KD-Tree {Feito apenas ao iniciar o servidor}
 dados = carregar_dados_csv("./bares_com_cdb.csv")
 arvore = build_kdtree(dados)
 
 @app.route("/filtrar", methods=["POST"])
 def filtrar():
     payload = request.get_json()
-    sw = payload["sw"]  # { lat: ..., lng: ... }
+    sw = payload["sw"]
     ne = payload["ne"]
 
     lat_min, lon_min = sw["lat"], sw["lng"]
@@ -93,10 +93,19 @@ def filtrar():
 
     resultados = range_query_kdtree(arvore, ((lat_min, lon_min), (lat_max, lon_max)))
 
+
+    for i in range(len(resultados)):
+        id_estab = resultados[i]["ID_ATIV_ECON_ESTABELECIMENTO"]
+        if id_estab in cdb_dados:
+            resultados[i] = {**resultados[i], **cdb_dados[id_estab]}
+            resultados[i]["comida_di_buteco"] = True
+        else:
+            resultados[i]["comida_di_buteco"] = False
+
+    # Aplica o filtro (se estiver marcado)
     if comida_filter:
-        resultados = [
-            {**r, **cdb_dados[r["ID_ATIV_ECON_ESTABELECIMENTO"]]} for r in resultados if r["ID_ATIV_ECON_ESTABELECIMENTO"] in cdb_dados
-        ]
+        resultados = [r for r in resultados if r["comida_di_buteco"]]
+
     return jsonify(resultados)
 
 if __name__ == "__main__":
