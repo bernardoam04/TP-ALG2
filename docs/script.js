@@ -93,7 +93,7 @@ function plotarEstabelecimentos(bounds) {
         });
 
         const goldenBarIcon = L.icon({
-            iconUrl: 'docs/imagens/marker-icon-2x-gold-bar.png',
+            iconUrl: 'https://bernardoam04.github.io/TP-ALG2/docs/imagens/marker-icon-2x-gold-bar.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
@@ -101,7 +101,7 @@ function plotarEstabelecimentos(bounds) {
             shadowSize: [41, 41]
         });
         const goldenRestIcon = L.icon({
-            iconUrl: 'docs/imagens/marker-icon-2x-gold-rest.png',
+            iconUrl: 'https://bernardoam04.github.io/TP-ALG2/docs/imagens/marker-icon-2x-gold-rest.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
