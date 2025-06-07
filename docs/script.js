@@ -92,17 +92,38 @@ function plotarEstabelecimentos(bounds) {
             shadowSize: [41, 41]
         });
 
+        const goldenBarIcon = L.icon({
+            iconUrl: './imagens/marker-icon-2x-gold-bar.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+        const goldenRestIcon = L.icon({
+            iconUrl: './imagens/marker-icon-2x-gold-rest.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+
         // Usa marker cluster groups
         window.restaurantesGroup = L.markerClusterGroup({
             chunkedLoading: true,
-            maxClusterRadius: 40
+            maxClusterRadius: 30
         });
         window.baresGroup = L.markerClusterGroup({
             chunkedLoading: true,
-            maxClusterRadius: 40
+            maxClusterRadius: 30
         });
 
         estabelecimentos.forEach(estab => {
+            console.log("Estab:", estab);
+            const isButeco = estab.comida_di_buteco;
+            console.log(isButeco? "1" : "0")
             const lat = parseFloat(estab.LATITUDE);
             const lon = parseFloat(estab.LONGITUDE);
             const nome = estab.NOME_FANTASIA || estab.NOME || "Sem nome";
@@ -112,19 +133,26 @@ function plotarEstabelecimentos(bounds) {
 
             let popup = `<div class="text-center">`;
             popup += `<strong>${nome}</strong><br>${endereco}<br>Início: ${inicio}<br>Alvará: ${alvara}<br><br>`;
-            if (estab["Nome Petisco"] && estab["Descricao"] && estab["Link Imagem"]) {
+            if (isButeco){
                 popup += `
-                    <img src="${estab["Link Imagem"]}" class="img-fluid rounded mb-2" alt="Petisco"><br>
+                    <img src="imagens/${estab["ID_ATIV_ECON_ESTABELECIMENTO"]}.jpg" class="img-fluid rounded mb-2" alt="Petisco"><br>
                     <strong>${estab["Nome Petisco"]}</strong><br>
                     <button class="btn btn-sm btn-outline-info mt-2" onclick="mostrarDescricao('${estab["Descricao"].replace(/'/g, "\\'")}')">ℹ️ Ver Descrição</button>
                 `;
             }
             popup += `</div>`;
             const isBar = estab.DESCRICAO_CNAE_PRINCIPAL && estab.DESCRICAO_CNAE_PRINCIPAL.includes("BARES");
-
-            const marker = L.marker([lat, lon], {
-                icon: isBar ? barIcon : restauranteIcon
-            }).bindPopup(popup);
+            
+            let marker;
+            if(isButeco){
+                marker = L.marker([lat, lon], {
+                    icon: isBar ? goldenBarIcon : goldenRestIcon
+                }).bindPopup(popup);
+            }else{
+                marker = L.marker([lat, lon], {
+                    icon: isBar ? barIcon : restauranteIcon
+                }).bindPopup(popup);
+            }
 
             if (isBar) {
                 window.baresGroup.addLayer(marker);
@@ -198,4 +226,12 @@ function mostrarDescricao(texto) {
     modalBody.textContent = texto;
     const modal = new bootstrap.Modal(document.getElementById("descricaoModal"));
     modal.show();
+}
+
+// Chamar novamente a função para quando marcar ou desmarcar o checkbox
+function atualizarFiltroComida(){
+    if(drawnItems.getLayers().length > 0){
+        const bounds = drawnItems.getLayers()[0].getBounds();
+        plotarEstabelecimentos(bounds);
+    }
 }
